@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Book</title>
+</head>
+<body>
+    <h1>Recipe Book</h1>
+    <form id="recipe-form">
+        <label for="recipe-name">Recipe Name:</label>
+        <input type="text" id="recipe-name" required>
+        <br>
+        <label for="recipe-ingredients">Ingredients:</label>
+        <textarea id="recipe-ingredients" required></textarea>
+        <br>
+        <label for="recipe-instructions">Instructions:</label>
+        <textarea id="recipe-instructions" required></textarea>
+        <br>
+        <button type="submit">Add Recipe</button>
+    </form>
+    <h2>Recipes:</h2>
+    <div id="recipe-list"></div>
+    <script>
+        const recipeForm = document.getElementById('recipe-form');
+        const recipeList = document.getElementById('recipe-list');
+
+        function loadRecipes() {
+            const recipes = JSON.parse(localStorage.getItem('recipes')) || [];
+            recipeList.innerHTML = '';
+            recipes.forEach(recipe => {
+                const recipeDiv = document.createElement('div');
+                recipeDiv.innerHTML = `
+                    <h3>${recipe.name}</h3>
+                    <p>Ingredients:</p>
+                    <p>${recipe.ingredients}</p>
+                    <p>Instructions:</p>
+                    <p>${recipe.instructions}</p>
+                    <button onclick="deleteRecipe('${recipe.name}')">Delete Recipe</button>
+                `;
+                recipeList.appendChild(recipeDiv);
+            });
+        }
+
+        function saveRecipe(recipe) {
+            const recipes = JSON.parse(localStorage.getItem('recipes')) || [];
+            recipes.push(recipe);
+            localStorage.setItem('recipes', JSON.stringify(recipes));
+            loadRecipes();
+        }
+
+        function deleteRecipe(recipeName) {
+            localStorage.setItem('recipes', JSON.stringify(
+                JSON.parse(localStorage.getItem('recipes')).filter(recipe => recipe.name !== recipeName)
+            ));
+            loadRecipes();
+        }
+
+        recipeForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            if (recipeForm.checkValidity()) {
+                const recipeName = document.getElementById("recipe-name").value;
+                const recipeIngredients = document.getElementById("recipe-ingredients").value;
+                const recipeInstructions = document.getElementById("recipe-instructions").value;
+                if (recipeName && recipeIngredients && recipeInstructions) {
+                    saveRecipe({
+                        name: recipeName,
+                        ingredients: recipeIngredients,
+                        instructions: recipeInstructions
+                    });
+                    recipeForm.reset();
+                }
+            }
+        });
+
+        loadRecipes();
+    </script>
+</body>
+</html>
